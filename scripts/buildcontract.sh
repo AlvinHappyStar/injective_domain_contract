@@ -145,19 +145,19 @@ InstantiateCw20() {
 }
 
 InstantiateIncentive() {
-    CODE_INCENTIVE=$(cat $CODE_DIR"incentive")
+    CODE_INCENTIVE=$(cat $CODE_DIR"domain")
     
-    TXHASH=$(seid tx wasm instantiate $CODE_INCENTIVE '{}' --label "Incentive$CODE_INCENTIVE" --amount 5000000ustars --admin $ADDR_ADMIN $WALLET $TXFLAG -y --output json | jq -r '.txhash')
+    TXHASH=$(injectived tx wasm instantiate $CODE_INCENTIVE '{}' --label "domain_$CODE_INCENTIVE" --amount 1inj --admin $ADDR_ADMIN $WALLET $TXFLAG -y --output json | jq -r '.txhash')
     # TXHASH=$(junod tx wasm instantiate $CODE_INCENTIVE '{"stake_token_address":"juno1t46z6hg8vvsena7sue0vg6w85ljar3cundplkre9sz0skeqkap9sxyyy6m", "reward_token_denom":"'$DENOM'", "apys":[{"duration":100000,"rate":10}], "reward_interval":10000}' --label "Incentive$CODE_INCENTIVE" --admin $ADDR_ADMIN $WALLET $TXFLAG -y --output json | jq -r '.txhash')
     echo $TXHASH
     CONTRACT_ADDR=""
     while [[ $CONTRACT_ADDR == "" ]]
     do
         sleep 3
-        CONTRACT_ADDR=$(seid query tx $TXHASH $NODECHAIN --output json | jq -r '.logs[0].events[0].attributes[0].value')
+        CONTRACT_ADDR=$(injectived query tx $TXHASH $NODECHAIN --output json | jq -r '.logs[0].events[2].attributes[0].value')
     done
     echo $CONTRACT_ADDR
-    echo $CONTRACT_ADDR > $ADDRESS_DIR"incentive"
+    echo $CONTRACT_ADDR > $ADDRESS_DIR"domain"
 }
 
 
