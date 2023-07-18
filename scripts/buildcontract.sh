@@ -161,14 +161,9 @@ InstantiateIncentive() {
 }
 
 
-ClaimFlip() {
-    CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"incentive")
-    echo $(seid tx wasm execute $CONTRACT_INCENTIVE '{"flip": {"level": 0}}' --amount 2000000ustars --from st $TXFLAG -y)
-}
-
-ClaimRPS() {
-    CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"incentive")
-    echo $(seid tx wasm execute $CONTRACT_INCENTIVE '{"rps": {"level": 0}}' --amount 2000000ustars --from st $TXFLAG -y)
+ClaimRegister() {
+    CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"domain")
+    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "myname2"}}' --amount 1000000inj --from st $TXFLAG)
 }
 
 WithDraw() {
@@ -238,12 +233,12 @@ PrintWalletBalance() {
 #################################### End of Function ###################################################
 if [[ $FUNCTION == "" ]]; then
     #  RustBuild
-    CATEGORY=domain
-     Upload
+    # CATEGORY=domain
+    #  Upload
     
     # InstantiateIncentive
     # ClaimRPS
-    # ClaimFlip
+    ClaimRegister
     # WithDraw
     #printf "y\npassword\n" | Upload
     # # CATEGORY=cw20_base

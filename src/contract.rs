@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult
+    attr, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult
 };
 
 use cw2::{set_contract_version};
@@ -74,7 +74,12 @@ pub fn execute_register(
     // name is available
     NAMERESOLVER.save(deps.storage, key, &record)?;
 
-    Ok(Response::default())
+    return Ok(Response::new()
+        .add_attributes(vec![
+            attr("action", "register"),
+            attr("address", record.owner),
+            attr("name", name),
+        ]));
 }
 
 
