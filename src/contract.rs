@@ -1,13 +1,13 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    attr, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult
+    attr, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,CosmosMsg
 };
 
 use cw2::{set_contract_version};
 use crate::error::ContractError;
 use crate::msg::{
-    ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg, NameRecord, ResolveRecordResponse, ResolveAddressResponse
+    ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg, NameRecord, AddressRecord, ResolveRecordResponse, ResolveAddressResponse
 };
 
 use crate::state::{
@@ -50,7 +50,8 @@ pub fn execute(
     match msg {
         ExecuteMsg::UpdateOwner { owner } => util::execute_update_owner(deps.storage, deps.api, info.sender.clone(), owner),
         ExecuteMsg::UpdateEnabled { enabled } => util::execute_update_enabled(deps.storage, deps.api, info.sender.clone(), enabled),
-        ExecuteMsg::Register { name} => execute_register(deps, env, info, name),
+        ExecuteMsg::Register { name, duration} => execute_register(deps, env, info, name, duration),
+        ExecuteMsg::Withdraw { } => execute_withdraw(deps, env, info),
     }
 }
 
@@ -59,6 +60,7 @@ pub fn execute_register(
     _env: Env,
     info: MessageInfo,
     name: String,
+    duration: u64,
 ) -> Result<Response, ContractError> {
 
     util::check_enabled(deps.storage)?;
@@ -66,6 +68,8 @@ pub fn execute_register(
     let key = name.as_bytes();
     let record = NameRecord { owner: info.sender.clone() };
 
+
+    let expired_date = _env.block.time.seconds() + duration * 365 * 24 * 3600;
     
 
     if (NAMERESOLVER.may_load(deps.storage, key)?).is_some() {
@@ -75,22 +79,47 @@ pub fn execute_register(
 
     let addr_key = info.sender.clone();
 
-    let mut addr_names = match ADDRRESOLVER.may_load(deps.storage, addr_key.clone())? {
-        Some(names) => names,
+    let mut addr_record = match ADDRRESOLVER.may_load(deps.storage, addr_key.clone())? {
+        Some(address_records) => address_records,
         None => vec![],
     };
 
-    addr_names.push(name.clone());
+    addr_record.push(AddressRecord{name : name.clone(), expired: expired_date});
     // name is available
     NAMERESOLVER.save(deps.storage, key, &record)?;
 
-    ADDRRESOLVER.save(deps.storage, addr_key, &addr_names)?;
+    ADDRRESOLVER.save(deps.storage, addr_key, &addr_record)?;
 
     return Ok(Response::new()
         .add_attributes(vec![
             attr("action", "register"),
             attr("address", record.owner),
             attr("name", name),
+        ]));
+}
+
+pub fn execute_withdraw(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+) -> Result<Response, ContractError> {
+
+    util::check_owner(deps.storage, deps.api, info.sender.clone())?;
+
+    let cfg = CONFIG.load(deps.storage)?;
+    
+    let contract_amount = util::get_token_amount_of_address(deps.querier, cfg.denom.clone(), env.contract.address.clone())?;
+
+    let mut messages:Vec<CosmosMsg> = vec![];
+    messages.push(util::transfer_token_message(deps.querier, cfg.denom.clone(), contract_amount, info.sender.clone())?);
+
+    
+    return Ok(Response::new()
+        .add_messages(messages)
+        .add_attributes(vec![
+            attr("action", "withdraw"),
+            attr("address", info.sender.clone()),
+            attr("amount", contract_amount),
         ]));
 }
 

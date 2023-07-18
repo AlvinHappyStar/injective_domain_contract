@@ -163,12 +163,12 @@ InstantiateIncentive() {
 
 ClaimRegister() {
     CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"domain")
-    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "name"}}' --amount 1000000inj --from testnet-key $TXFLAG)
+    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "name1", "duration": 1}}' --amount 1000000inj --from st $TXFLAG)
 }
 
 WithDraw() {
-    CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"incentive")
-    echo $(seid tx wasm execute $CONTRACT_INCENTIVE '{"withdraw": {"amount": "5000000"}}' --from testnet-key $TXFLAG -y)
+    CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"domain")
+    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"withdraw": {}}' --from testnet-key $TXFLAG -y)
 }
 
 Stake() {
@@ -237,8 +237,8 @@ if [[ $FUNCTION == "" ]]; then
     #  Upload
     
     # InstantiateIncentive
-    ClaimRegister
-    # WithDraw
+    # ClaimRegister
+    WithDraw
     #printf "y\npassword\n" | Upload
     # # CATEGORY=cw20_base
     # # printf "y\npassword\n" | Upload

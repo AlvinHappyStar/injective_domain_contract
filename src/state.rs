@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use cosmwasm_std::{Addr, Uint128};
 use crate::msg::{
-    NameRecord
+    NameRecord, AddressRecord
 };
 
 use cw_storage_plus::{Item, Map};
@@ -26,4 +26,4 @@ pub const RESOLVE_KEY: &str = "NAMERESOLVER";
 pub const NAMERESOLVER: Map<&[u8], NameRecord> = Map::new(RESOLVE_KEY);
 
 pub const ADDR_RESOLVE_KEY: &str = "ADDRRESOLVER";
-pub const ADDRRESOLVER: Map<Addr, Vec<String>> = Map::new(ADDR_RESOLVE_KEY);
+pub const ADDRRESOLVER: Map<Addr, Vec<AddressRecord>> = Map::new(ADDR_RESOLVE_KEY);

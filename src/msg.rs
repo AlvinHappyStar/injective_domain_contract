@@ -17,7 +17,9 @@ pub enum ExecuteMsg {
     },
     Register {
         name: String,
-    }
+        duration: u64,
+    },
+    Withdraw { }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -48,6 +50,12 @@ pub struct ResolveRecordResponse {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct AddressRecord {
+    pub name: String,
+    pub expired: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ResolveAddressResponse {
-    pub list: Vec<String>
+    pub list: Vec<AddressRecord>
 }
