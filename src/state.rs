@@ -24,3 +24,6 @@ pub const CONFIG: Item<Config> = Item::new(CONFIG_KEY);
 
 pub const RESOLVE_KEY: &str = "NAMERESOLVER";
 pub const NAMERESOLVER: Map<&[u8], NameRecord> = Map::new(RESOLVE_KEY);
+
+pub const ADDR_RESOLVE_KEY: &str = "ADDRRESOLVER";
+pub const ADDRRESOLVER: Map<Addr, Vec<String>> = Map::new(ADDR_RESOLVE_KEY);

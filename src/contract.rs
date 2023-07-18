@@ -1,17 +1,17 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    attr, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult
+    attr, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult
 };
 
 use cw2::{set_contract_version};
 use crate::error::ContractError;
 use crate::msg::{
-    ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg, NameRecord, ResolveRecordResponse
+    ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg, NameRecord, ResolveRecordResponse, ResolveAddressResponse
 };
 
 use crate::state::{
-    Config, CONFIG, NAMERESOLVER
+    Config, CONFIG, NAMERESOLVER, ADDRRESOLVER
 };
 
 use crate::util;
@@ -64,15 +64,27 @@ pub fn execute_register(
     util::check_enabled(deps.storage)?;
 
     let key = name.as_bytes();
-    let record = NameRecord { owner: info.sender };
+    let record = NameRecord { owner: info.sender.clone() };
+
+    
 
     if (NAMERESOLVER.may_load(deps.storage, key)?).is_some() {
         // name is already taken
         return Err(ContractError::NameTaken { name });
     }
 
+    let addr_key = info.sender.clone();
+
+    let mut addr_names = match ADDRRESOLVER.may_load(deps.storage, addr_key.clone())? {
+        Some(names) => names,
+        None => vec![],
+    };
+
+    addr_names.push(name.clone());
     // name is available
     NAMERESOLVER.save(deps.storage, key, &record)?;
+
+    ADDRRESOLVER.save(deps.storage, addr_key, &addr_names)?;
 
     return Ok(Response::new()
         .add_attributes(vec![
@@ -89,7 +101,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Config {} 
             => to_binary(&query_config(deps, env)?),
         QueryMsg::ResolveRecord { name } => to_binary(&query_resolver(deps, name)?),
-        
+        QueryMsg::ResolveAddr { address } => to_binary(&query_address_resolver(deps, address)?),
     }
 }
 
@@ -102,6 +114,14 @@ pub fn query_config(deps: Deps, env: Env) -> StdResult<ConfigResponse> {
         denom: cfg.denom,
         enabled: cfg.enabled
     })
+}
+
+pub fn query_address_resolver(deps: Deps, address: Addr) -> StdResult<ResolveAddressResponse> {
+    // let key = deps.api.addr_validate(&address);
+
+    let list = ADDRRESOLVER.load(deps.storage, address)?;
+
+    Ok(ResolveAddressResponse { list })
 }
 
 pub fn query_resolver(deps: Deps, name: String) -> StdResult<ResolveRecordResponse> {

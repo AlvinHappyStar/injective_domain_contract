@@ -163,7 +163,7 @@ InstantiateIncentive() {
 
 ClaimRegister() {
     CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"domain")
-    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "myname2"}}' --amount 1000000inj --from st $TXFLAG)
+    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "name"}}' --amount 1000000inj --from testnet-key $TXFLAG)
 }
 
 WithDraw() {
@@ -237,7 +237,6 @@ if [[ $FUNCTION == "" ]]; then
     #  Upload
     
     # InstantiateIncentive
-    # ClaimRPS
     ClaimRegister
     # WithDraw
     #printf "y\npassword\n" | Upload

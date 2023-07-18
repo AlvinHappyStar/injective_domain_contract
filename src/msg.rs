@@ -25,6 +25,7 @@ pub enum ExecuteMsg {
 pub enum QueryMsg {
     Config {},
     ResolveRecord { name: String },
+    ResolveAddr {address: Addr}
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema, Debug)]
@@ -44,4 +45,9 @@ pub struct NameRecord {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ResolveRecordResponse {
     pub address: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct ResolveAddressResponse {
+    pub list: Vec<String>
 }
