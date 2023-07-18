@@ -1,1 +1,1 @@
-Stargaze Bet Contract
+Injective Domain Contract
