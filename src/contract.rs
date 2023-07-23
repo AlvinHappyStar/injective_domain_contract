@@ -51,6 +51,7 @@ pub fn execute(
         ExecuteMsg::UpdateOwner { owner } => util::execute_update_owner(deps.storage, deps.api, info.sender.clone(), owner),
         ExecuteMsg::UpdateEnabled { enabled } => util::execute_update_enabled(deps.storage, deps.api, info.sender.clone(), enabled),
         ExecuteMsg::Register { name, duration} => execute_register(deps, env, info, name, duration),
+        ExecuteMsg::Extend { name, duration} => execute_extend(deps, env, info, name, duration),
         ExecuteMsg::Withdraw { } => execute_withdraw(deps, env, info),
     }
 }
@@ -95,6 +96,40 @@ pub fn execute_register(
             attr("action", "register"),
             attr("address", record.owner),
             attr("name", name),
+        ]));
+}
+
+pub fn execute_extend(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    name: String,
+    duration: u64,
+) -> Result<Response, ContractError> {
+
+    util::check_enabled(deps.storage)?;
+
+    let addr_key = info.sender.clone();
+
+    let mut addr_record = match ADDRRESOLVER.may_load(deps.storage, addr_key.clone())? {
+        Some(address_records) => address_records,
+        None => vec![],
+    };
+
+    for record in &mut addr_record {
+        if record.name == name {
+            record.expired = record.expired + duration * 365 * 24 * 3600;
+            break;
+        }
+    }
+
+    ADDRRESOLVER.save(deps.storage, addr_key, &addr_record)?;
+
+    return Ok(Response::new()
+        .add_attributes(vec![
+            attr("action", "register"),
+            attr("name", name),
+            attr("expired", duration.to_string())
         ]));
 }
 

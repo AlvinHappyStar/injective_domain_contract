@@ -19,6 +19,10 @@ pub enum ExecuteMsg {
         name: String,
         duration: u64,
     },
+    Extend {
+        name: String,
+        duration: u64,
+    },
     Withdraw { }
 }
 

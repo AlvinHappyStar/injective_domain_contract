@@ -163,7 +163,12 @@ InstantiateIncentive() {
 
 ClaimRegister() {
     CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"domain")
-    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "name1", "duration": 1}}' --amount 1000000inj --from st $TXFLAG)
+    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"register": {"name": "name2", "duration": 2}}' --amount 1000000inj --from st $TXFLAG)
+}
+
+ClaimExtend() {
+    CONTRACT_INCENTIVE=$(cat $ADDRESS_DIR"domain")
+    echo $(injectived tx wasm execute $CONTRACT_INCENTIVE '{"extend": {"name": "name2", "duration": 1}}' --amount 1000000inj --from st $TXFLAG)
 }
 
 WithDraw() {
@@ -238,7 +243,8 @@ if [[ $FUNCTION == "" ]]; then
     
     # InstantiateIncentive
     # ClaimRegister
-    WithDraw
+    ClaimExtend
+    # WithDraw
     #printf "y\npassword\n" | Upload
     # # CATEGORY=cw20_base
     # # printf "y\npassword\n" | Upload
